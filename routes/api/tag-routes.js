@@ -1,13 +1,12 @@
 const router = require('express').Router();
-const { tag, product, productTag } = require('../../models');
+const { Tag, Product, ProductTag } = require('../../models');
 
 //Find all tags
 router.get('/', async (req, res) => {
   
   try {
     const tagData = await Tag.findAll(req.params.id, {
-      // JOIN with locations, using the Trip through table
-      include: [{ model: product, through: productTag, as: 'tagged_products' }]
+      include: [{ model: Product }],
     });
 
     res.status(200).json(tagData);
@@ -15,12 +14,13 @@ router.get('/', async (req, res) => {
     res.status(500).json(err);
   }
 });
+
 //Find tag by an ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
 
   try {
     const tagData = await tag.findByPk(req.params.id, {
-      include: [{ model: product, through: productTag, as: 'tagged_products' }]
+      include: [{ model: Product }]
     });
 
     if (!locationData) {
@@ -38,16 +38,9 @@ router.get('/:id', (req, res) => {
 router.post('/', async (req, res) => {
   try {
     let tagData = await Tag.create(req.body);
-
-    if (!tagData) {
-      res.status(404).json({ message: 'No Tag found with that id!' });
-      return;
-    }
-
     res.status(200).json(tagData);
   } catch (err) {
-    console.log(err);
-    res.status(400).json(err);
+   res.status(400).json(err);
   }
 });
 
